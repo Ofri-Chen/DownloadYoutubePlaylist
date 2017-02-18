@@ -17,84 +17,69 @@ namespace DownloadYoutubePlaylist
     class Program
     {
         private static IWebDriver _driver;
-        private static List<IWebElement> _playlistVideos;
         private static List<string> _urlList;
         private static List<string> _titles;
         private static int _timeout;
         private static string _baseUrl = "";
         private static string _downloadFolderPath;
-        private static string _targetFolderPath = @"C:\Users\ofric\Desktop\Music\";
+        private static string _targetFolderPath;
         private static string _converterUrl = "https://www.onlinevideoconverter.com/video-converter";
+        private static int _waitForConversion;
         static void Main(string[] args)
         {
-            Initialize();
-            Menu();
-            InitLists();
-            FillVideosList();
-            FillUrlList();
-
-            for (int i = 0; i < _playlistVideos.Count; i++)
+            try
             {
-                _driver.Navigate().GoToUrl(_converterUrl);
-                FillUrlTextBox(_urlList[i]);
-                _driver.FindElement(By.Id("convert1")).Click();
+                Initialize();
+                Menu();
+                FillUrlList();
 
-                if (!DownloadSong())
+                for (int i = 0; i < _playlistVideos.Count; i++)
                 {
-                    continue;
+                    ConvertSong(_urlList[i]);
+                    if (!DownloadSong())
+                    {
+                        continue;
+                    }
+                    SaveTitle();
                 }
 
-                string title = _driver.FindElement(By.CssSelector(".download-section-1-1-title-content a")).Text;
-                MakeTitleViable(ref title);
+                ClearDriver(_driver);
 
-                _titles.Add(title);
+                Thread.Sleep(_timeout * 1000);
+
+                MoveFilesToDirectory();
+
+
+            }
+            catch
+            {
+                ClearDriver(_driver);
             }
 
-            ClearDriver(_driver);
-
-            Thread.Sleep(_timeout*1000);
-
-            for (int i = 0; i < _titles.Count; i++)
-            {
-                try
-                {
-                    File.Move(_downloadFolderPath + "\\" + _titles[i] + ".mp3", _targetFolderPath + "\\" + _titles[i] + ".mp3");
-                }
-                catch
-                {
-                }
-            }
         }
 
-        public static void Initialize()
+        #region Initialize
+        private static void Initialize()
         {
             _driver = new ChromeDriver(@"C:\Selenium");
             _timeout = Convert.ToInt32(ConfigurationManager.AppSettings["timeout"]);
             _downloadFolderPath = ConfigurationManager.AppSettings["downloadFolderPath"];
-            ClearDriver(_driver);
+            _targetFolderPath = ConfigurationManager.AppSettings["targetFolderPath"];
+            _waitForConversion = Convert.ToInt32(ConfigurationManager.AppSettings["waitForConversion"]);
+            InitLists();
         }
-        public static void MakeTitleViable(ref string title)
+        private static void ClearDriver(IWebDriver driver)
         {
-            // \/:*?"<>|
-            string viableTitle = "";
-            for (int i = 0; i < title.Length; i++)
-            {
-                if (title[i] != '\\' ||
-                    title[i] != '/' ||
-                    title[i] != ':' ||
-                    title[i] != '*' ||
-                    title[i] != '?' ||
-                    title[i] != '"' ||
-                    title[i] != '<' ||
-                    title[i] != '>' ||
-                    title[i] != '|')
-                {
-                    viableTitle += title[i];
-                }
-            }
+            driver.Quit();
         }
-
-        public static void Menu()
+        public static void InitLists()
+        {
+            _playlistVideos = new List<IWebElement>();
+            _urlList = new List<string>();
+            _titles = new List<string>();
+        }
+        #endregion
+        private static void Menu()
         {
             Console.WriteLine("Enter Playlist url");
             _baseUrl = Console.ReadLine();
@@ -104,35 +89,30 @@ namespace DownloadYoutubePlaylist
             Console.WriteLine("Directory's path: " + _targetFolderPath);
         }
 
-        public static void InitLists()
-        {
-            _playlistVideos = new List<IWebElement>();
-            _urlList = new List<string>();
-            _titles = new List<string>();
-        }
-
-        public static void FillVideosList()
+        private static void FillUrlList()
         {
             _driver.Navigate().GoToUrl(_baseUrl);
-            _playlistVideos = _driver.FindElements(By.ClassName("playlist-video")).ToList();
-        }
-
-        public static void FillUrlList()
-        {
-            for (int i = 0; i < _playlistVideos.Count; i++)
+            List <IWebElement> playlistVideos = _driver.FindElements(By.ClassName("playlist-video")).ToList();
+            for (int i = 0; i < playlistVideos.Count; i++)
             {
-                _urlList.Add(_playlistVideos[i].GetAttribute("href"));
+                _urlList.Add(playlistVideos[i].GetAttribute("href"));
             }
         }
 
-        public static void FillUrlTextBox(string url)
+        #region Conversion and Download
+        private static void FillUrlTextBox(string url)
         {
             IWebElement urlTextBox = _driver.FindElement(By.Id("texturl"));
             urlTextBox.Clear();
             urlTextBox.SendKeys(url);
         }
-
-        public static bool DownloadSong()
+        private static void ConvertSong(string url)
+        {
+            _driver.Navigate().GoToUrl(_converterUrl);
+            FillUrlTextBox(url);
+            _driver.FindElement(By.Id("convert1")).Click();
+        }
+        private static bool DownloadSong()
         {
             Stopwatch sw = new Stopwatch();
             sw.Start();
@@ -160,10 +140,47 @@ namespace DownloadYoutubePlaylist
             }
             return true;
         }
-        public static void ClearDriver(IWebDriver driver)
+        private static void SaveTitle()
         {
-            driver.Quit();
-            driver.Dispose();
+            string title = _driver.FindElement(By.CssSelector(".download-section-1-1-title-content a")).Text;
+            MakeTitleViable(ref title);
+            _titles.Add(title);
+        }
+        private static void MakeTitleViable(ref string title)
+        {
+            // \/:*?"<>|
+            string viableTitle = "";
+            for (int i = 0; i < title.Length; i++)
+            {
+                if (title[i] != '\\' ||
+                    title[i] != '/' ||
+                    title[i] != ':' ||
+                    title[i] != '*' ||
+                    title[i] != '?' ||
+                    title[i] != '"' ||
+                    title[i] != '<' ||
+                    title[i] != '>' ||
+                    title[i] != '|')
+                {
+                    viableTitle += title[i];
+                }
+            }
+        }
+        #endregion
+
+        private static void MoveFilesToDirectory()
+        {
+            for (int i = 0; i < _titles.Count; i++)
+            {
+                try
+                {
+                    File.Move(_downloadFolderPath + "\\" + _titles[i] + ".mp3", _targetFolderPath + "\\" + _titles[i] + ".mp3");
+                }
+                catch
+                {
+                    continue;
+                }
+            }
         }
     }
 }
