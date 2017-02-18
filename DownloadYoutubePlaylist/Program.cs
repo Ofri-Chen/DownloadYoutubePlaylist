@@ -10,6 +10,7 @@ using OpenQA.Selenium.Chrome;
 using System.Diagnostics;
 using System.Net.Mime;
 using System.Threading;
+using System.Configuration;
 
 namespace DownloadYoutubePlaylist
 {
@@ -19,13 +20,14 @@ namespace DownloadYoutubePlaylist
         private static List<IWebElement> _playlistVideos;
         private static List<string> _urlList;
         private static List<string> _titles;
-        private static string _timeout;
+        private static int _timeout;
         private static string _baseUrl = "";
-        private static string _downloadFolderPath = @"C:\Users\ofric\Downloads";
+        private static string _downloadFolderPath;
         private static string _targetFolderPath = @"C:\Users\ofric\Desktop\Music\";
         private static string _converterUrl = "https://www.onlinevideoconverter.com/video-converter";
         static void Main(string[] args)
         {
+            Initialize();
             Menu();
             InitLists();
             FillVideosList();
@@ -50,7 +52,7 @@ namespace DownloadYoutubePlaylist
 
             ClearDriver(_driver);
 
-            Thread.Sleep(Convert.ToInt32(_timeout)*1000);
+            Thread.Sleep(_timeout*1000);
 
             for (int i = 0; i < _titles.Count; i++)
             {
@@ -64,6 +66,13 @@ namespace DownloadYoutubePlaylist
             }
         }
 
+        public static void Initialize()
+        {
+            _driver = new ChromeDriver(@"C:\Selenium");
+            _timeout = Convert.ToInt32(ConfigurationManager.AppSettings["timeout"]);
+            _downloadFolderPath = ConfigurationManager.AppSettings["downloadFolderPath"];
+            ClearDriver(_driver);
+        }
         public static void MakeTitleViable(ref string title)
         {
             // \/:*?"<>|
@@ -93,13 +102,6 @@ namespace DownloadYoutubePlaylist
             Console.WriteLine("Enter target directory");
             _targetFolderPath += Console.ReadLine();
             Console.WriteLine("Directory's path: " + _targetFolderPath);
-
-            Console.WriteLine("Enter Timeout");
-            _timeout = Console.ReadLine();
-            if (_timeout.ToString() == "")
-            {
-                _timeout = "30";
-            }
         }
 
         public static void InitLists()
@@ -111,7 +113,6 @@ namespace DownloadYoutubePlaylist
 
         public static void FillVideosList()
         {
-            _driver = new ChromeDriver(@"C:\Selenium");
             _driver.Navigate().GoToUrl(_baseUrl);
             _playlistVideos = _driver.FindElements(By.ClassName("playlist-video")).ToList();
         }
