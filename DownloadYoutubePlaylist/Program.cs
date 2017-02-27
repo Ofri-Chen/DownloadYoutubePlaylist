@@ -20,7 +20,7 @@ namespace DownloadYoutubePlaylist
         private static List<string> _urlList;
         private static List<string> _titles;
         private static int _timeout;
-        private static string _baseUrl = "";
+        private static string _baseUrl;
         private static string _downloadFolderPath;
         private static string _targetFolderPath;
         private static string _converterUrl = "https://www.onlinevideoconverter.com/video-converter";
@@ -33,7 +33,7 @@ namespace DownloadYoutubePlaylist
                 Menu();
                 FillUrlList();
 
-                for (int i = 0; i < _playlistVideos.Count; i++)
+                for (int i = 0; i < _urlList.Count; i++)
                 {
                     ConvertSong(_urlList[i]);
                     if (!DownloadSong())
@@ -74,7 +74,6 @@ namespace DownloadYoutubePlaylist
         }
         public static void InitLists()
         {
-            _playlistVideos = new List<IWebElement>();
             _urlList = new List<string>();
             _titles = new List<string>();
         }
@@ -129,6 +128,7 @@ namespace DownloadYoutubePlaylist
                 try
                 {
                     _driver.FindElement(By.Id("downloadq")).Click();
+                    break;
                 }
                 catch
                 {
