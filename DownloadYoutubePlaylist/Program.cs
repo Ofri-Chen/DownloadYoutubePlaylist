@@ -37,7 +37,6 @@ namespace DownloadYoutubePlaylist
 
                 Thread.Sleep(_timeout * 1000);
                 MoveFilesToDirectory();
-
             }
             catch
             {
@@ -101,7 +100,7 @@ namespace DownloadYoutubePlaylist
             _driver.Navigate().GoToUrl(_converterUrl);
             FillUrlTextBox(url);
             _driver.FindElement(By.Id("convert1")).Click();
-            if(DownloadSong())
+            if (DownloadSong())
             {
                 SaveTitle();
             }
@@ -114,14 +113,7 @@ namespace DownloadYoutubePlaylist
             sw.Start();
             while (sw.Elapsed < TimeSpan.FromSeconds(30))
             {
-                var windowHandles = _driver.WindowHandles;
-                if (windowHandles.Count > 1)
-                {
-                    //Close pop up tab
-                    _driver.SwitchTo().Window(windowHandles[1]);
-                    _driver.Close();
-                    _driver.SwitchTo().Window(windowHandles[0]);
-                }
+                ClosePopUpTabs();
                 try
                 {
                     _driver.FindElement(By.Id("downloadq")).Click();
@@ -142,6 +134,16 @@ namespace DownloadYoutubePlaylist
             string title = _driver.FindElement(By.CssSelector(".download-section-1-1-title-content a")).Text;
             MakeTitleViable(ref title);
             _titles.Add(title);
+        }
+        private static void ClosePopUpTabs()
+        {
+            var windowHandles = _driver.WindowHandles;
+            for (int i = 1; i < windowHandles.Count; i++)
+            {
+                _driver.SwitchTo().Window(windowHandles[1]);
+                _driver.Close();
+            }
+            _driver.SwitchTo().Window(windowHandles[0]);
         }
         private static void MakeTitleViable(ref string title)
         {
