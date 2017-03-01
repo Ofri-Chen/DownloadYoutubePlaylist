@@ -25,7 +25,7 @@ namespace DownloadYoutubePlaylist
         private static string _downloadFolderPath;
         private static string _targetFolderPath;
         private static string _converterUrl = "https://www.onlinevideoconverter.com/video-converter";
-        public static string _logPath;
+        public static string _logFileName;
         private static int _waitForConversion;
         static void Main(string[] args)
         {
@@ -62,7 +62,7 @@ namespace DownloadYoutubePlaylist
         {
             _downloadFolderPath = ConfigurationManager.AppSettings["downloadFolderPath"];
             _targetFolderPath = ConfigurationManager.AppSettings["targetFolderPath"];
-            _logPath = ConfigurationManager.AppSettings["logPath"];
+            _logFileName = ConfigurationManager.AppSettings["logFileName"];
             _timeout = Convert.ToInt32(ConfigurationManager.AppSettings["timeout"]);
             _waitForConversion = Convert.ToInt32(ConfigurationManager.AppSettings["waitForConversion"]);
         }
@@ -113,21 +113,45 @@ namespace DownloadYoutubePlaylist
         {
             _driver.Navigate().GoToUrl(_converterUrl);
             FillUrlTextBox(url);
-            _driver.FindElement(By.Id("convert1")).Click();
-            if (DownloadSong())
+            bool convertionFlag = true;
+
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            while (sw.Elapsed < TimeSpan.FromSeconds(20))
             {
-                string title = GetTitle();
-                LogSucess(title);
-                SaveTitle(title);
+                ClosePopUpTabs();
+                try
+                {
+                    _driver.FindElement(By.Id("convert1")).Click();
+                    break;
+                }
+                catch
+                {
+                    if (sw.Elapsed > TimeSpan.FromSeconds(20)) ;
+                    {
+                        LogException("Took too long for the convert button to appear");
+                        convertionFlag = false;
+                    }
+                }
             }
 
-            try
+            if (convertionFlag)
             {
-                ConvertAndDownload(_urls.Pop());
-            }
-            catch(Exception ex)
-            {
-                LogException(ex.Message);
+                if (DownloadSong())
+                {
+                    string title = GetTitle();
+                    LogSucess(title);
+                    SaveTitle(title);
+                }
+
+                try
+                {
+                    ConvertAndDownload(_urls.Pop());
+                }
+                catch (Exception ex)
+                {
+                    LogException(ex.Message);
+                }
             }
         }
         private static bool DownloadSong()
@@ -146,6 +170,7 @@ namespace DownloadYoutubePlaylist
                 {
                     if (sw.Elapsed > TimeSpan.FromSeconds(30))
                     {
+                        LogException("Took too long to convert");
                         return false;
                     }
                 }
@@ -223,7 +248,7 @@ namespace DownloadYoutubePlaylist
         }
         private static void Log(string status, string logInfo)
         {
-            StreamWriter file = File.AppendText(_logPath);
+            StreamWriter file = File.AppendText(_targetFolderPath + "\\" + _logFileName);
             file.WriteLine("[" + DateTime.Now + "]  -  " + status + ": " + logInfo);
             file.Close();
         }
