@@ -17,7 +17,7 @@ namespace DownloadYoutubePlaylist
     class Program
     {
         private static IWebDriver _driver;
-        private static List<string> _urlList;
+        private static Stack<string> _urls;
         private static List<string> _titles;
         private static int _timeout;
         private static string _baseUrl;
@@ -33,25 +33,16 @@ namespace DownloadYoutubePlaylist
                 Menu();
                 FillUrlList();
 
-                for (int i = 0; i < _urlList.Count; i++)
-                {
-                    ConvertSong(_urlList[i]);
-                    if (!DownloadSong())
-                    {
-                        continue;
-                    }
-                    SaveTitle();
-                }
-
-                ClearDriver(_driver);
+                ConvertAndDownload(_urls.Pop());
 
                 Thread.Sleep(_timeout * 1000);
-
                 MoveFilesToDirectory();
-
 
             }
             catch
+            {
+            }
+            finally
             {
                 ClearDriver(_driver);
             }
@@ -74,7 +65,7 @@ namespace DownloadYoutubePlaylist
         }
         public static void InitLists()
         {
-            _urlList = new List<string>();
+            _urls = new Stack<string>();
             _titles = new List<string>();
         }
         #endregion
@@ -91,10 +82,10 @@ namespace DownloadYoutubePlaylist
         private static void FillUrlList()
         {
             _driver.Navigate().GoToUrl(_baseUrl);
-            List <IWebElement> playlistVideos = _driver.FindElements(By.ClassName("playlist-video")).ToList();
+            List<IWebElement> playlistVideos = _driver.FindElements(By.ClassName("playlist-video")).ToList();
             for (int i = 0; i < playlistVideos.Count; i++)
             {
-                _urlList.Add(playlistVideos[i].GetAttribute("href"));
+                _urls.Push(playlistVideos[i].GetAttribute("href"));
             }
         }
 
@@ -105,11 +96,17 @@ namespace DownloadYoutubePlaylist
             urlTextBox.Clear();
             urlTextBox.SendKeys(url);
         }
-        private static void ConvertSong(string url)
+        private static void ConvertAndDownload(string url)
         {
             _driver.Navigate().GoToUrl(_converterUrl);
             FillUrlTextBox(url);
             _driver.FindElement(By.Id("convert1")).Click();
+            if(DownloadSong())
+            {
+                SaveTitle();
+            }
+
+            ConvertAndDownload(_urls.Pop());
         }
         private static bool DownloadSong()
         {
