@@ -12,6 +12,7 @@ using System.Net.Mime;
 using System.Threading;
 using System.Configuration;
 
+
 namespace DownloadYoutubePlaylist
 {
     class Program
@@ -24,13 +25,15 @@ namespace DownloadYoutubePlaylist
         private static string _downloadFolderPath;
         private static string _targetFolderPath;
         private static string _converterUrl = "https://www.onlinevideoconverter.com/video-converter";
+        public static string _logPath;
         private static int _waitForConversion;
         static void Main(string[] args)
         {
             try
             {
-                Initialize();
+                ReadConfig();
                 Menu();
+                Initialize();
                 FillUrlList();
 
                 ConvertAndDownload(_urls.Pop());
@@ -38,8 +41,9 @@ namespace DownloadYoutubePlaylist
                 Thread.Sleep(_timeout * 1000);
                 MoveFilesToDirectory();
             }
-            catch
+            catch(Exception ex)
             {
+                LogException(ex.Message);
             }
             finally
             {
@@ -50,21 +54,32 @@ namespace DownloadYoutubePlaylist
         #region Initialize
         private static void Initialize()
         {
-            InitGlobalVariables();
+            InitTargetDirectory();
+            InitDriver();
             InitLists();
         }
-        public static void InitGlobalVariables()
+        public static void ReadConfig()
         {
-            _driver = new ChromeDriver(@"C:\Selenium");
-            _timeout = Convert.ToInt32(ConfigurationManager.AppSettings["timeout"]);
             _downloadFolderPath = ConfigurationManager.AppSettings["downloadFolderPath"];
             _targetFolderPath = ConfigurationManager.AppSettings["targetFolderPath"];
+            _logPath = ConfigurationManager.AppSettings["logPath"];
+            _timeout = Convert.ToInt32(ConfigurationManager.AppSettings["timeout"]);
             _waitForConversion = Convert.ToInt32(ConfigurationManager.AppSettings["waitForConversion"]);
+        }
+
+        public static void InitDriver()
+        {
+            _driver = new ChromeDriver(@"C:\Selenium");
         }
         public static void InitLists()
         {
             _urls = new Stack<string>();
             _titles = new List<string>();
+        }
+
+        public static void InitTargetDirectory()
+        {
+            Directory.CreateDirectory(_targetFolderPath);
         }
         #endregion
         private static void Menu()
@@ -101,10 +116,19 @@ namespace DownloadYoutubePlaylist
             _driver.FindElement(By.Id("convert1")).Click();
             if (DownloadSong())
             {
-                SaveTitle();
+                string title = GetTitle();
+                LogSucess(title);
+                SaveTitle(title);
             }
 
-            ConvertAndDownload(_urls.Pop());
+            try
+            {
+                ConvertAndDownload(_urls.Pop());
+            }
+            catch(Exception ex)
+            {
+                LogException(ex.Message);
+            }
         }
         private static bool DownloadSong()
         {
@@ -126,13 +150,18 @@ namespace DownloadYoutubePlaylist
                     }
                 }
             }
+
             return true;
         }
-        private static void SaveTitle()
+        private static void SaveTitle(string title)
         {
-            string title = _driver.FindElement(By.CssSelector(".download-section-1-1-title-content a")).Text;
             MakeTitleViable(ref title);
             _titles.Add(title);
+        }
+
+        private static string GetTitle()
+        {
+            return _driver.FindElement(By.CssSelector(".download-section-1-1-title-content a")).Text;
         }
         private static void ClosePopUpTabs()
         {
@@ -174,11 +203,30 @@ namespace DownloadYoutubePlaylist
                 {
                     File.Move(_downloadFolderPath + "\\" + _titles[i] + ".mp3", _targetFolderPath + "\\" + _titles[i] + ".mp3");
                 }
-                catch
+                catch(Exception ex)
                 {
+                    LogException(ex.Message);
                     continue;
                 }
             }
         }
+
+        #region Log
+        private static void LogSucess(string title)
+        {
+            Log("Sucess", title);
+        }
+
+        private static void LogException(string message)
+        {
+            Log("Exception", message);
+        }
+        private static void Log(string status, string logInfo)
+        {
+            StreamWriter file = File.AppendText(_logPath);
+            file.WriteLine("[" + DateTime.Now + "]  -  " + status + ": " + logInfo);
+            file.Close();
+        }
+        #endregion
     }
 }
