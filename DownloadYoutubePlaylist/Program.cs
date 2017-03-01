@@ -43,24 +43,23 @@ namespace DownloadYoutubePlaylist
             }
             finally
             {
-                ClearDriver(_driver);
+                _driver.Quit();
             }
-
         }
 
         #region Initialize
         private static void Initialize()
+        {
+            InitGlobalVariables();
+            InitLists();
+        }
+        public static void InitGlobalVariables()
         {
             _driver = new ChromeDriver(@"C:\Selenium");
             _timeout = Convert.ToInt32(ConfigurationManager.AppSettings["timeout"]);
             _downloadFolderPath = ConfigurationManager.AppSettings["downloadFolderPath"];
             _targetFolderPath = ConfigurationManager.AppSettings["targetFolderPath"];
             _waitForConversion = Convert.ToInt32(ConfigurationManager.AppSettings["waitForConversion"]);
-            InitLists();
-        }
-        private static void ClearDriver(IWebDriver driver)
-        {
-            driver.Quit();
         }
         public static void InitLists()
         {
