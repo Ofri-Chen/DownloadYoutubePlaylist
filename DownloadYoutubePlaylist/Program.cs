@@ -1,18 +1,7 @@
 ﻿using System;
-using System.IO;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.Remoting.Messaging;
-using System.Text;
-using System.Threading.Tasks;
-using OpenQA.Selenium;
-using OpenQA.Selenium.Chrome;
-using System.Diagnostics;
-using System.Net.Mime;
 using System.Threading;
-using System.Configuration;
 using DownloadYoutubePlaylist.FileManagement;
-
+using DownloadYoutubePlaylist.API;
 
 namespace DownloadYoutubePlaylist
 {
@@ -23,13 +12,15 @@ namespace DownloadYoutubePlaylist
             try
             {
                 UIManager.Menu();
+
+                APIHandler.GetTopTracks();
+
+
                 DirectoryManager.InitTargetDirectory();
+                SeleniumHandler.SetDownloadsDirectoryPath();
                 SeleniumHandler.FillUrlList();
 
                 SeleniumHandler.ConvertAndDownload(Resources.UrlStack.Pop());
-
-                Thread.Sleep(ConfigManager.Timeout * 1000);
-                MP3Manager.MoveFilesToDirectory();
             }
             catch (Exception ex)
             {

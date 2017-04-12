@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using System.Diagnostics;
@@ -12,7 +10,7 @@ namespace DownloadYoutubePlaylist
 {
     public static class SeleniumHandler
     {
-        private static IWebDriver _driver = new ChromeDriver(ConfigManager.ChromeDriverPath);
+        private static IWebDriver _driver/* = new ChromeDriver(ConfigManager.ChromeDriverPath)*/;
 
         public static void ConvertAndDownload(string url)
         {
@@ -68,6 +66,22 @@ namespace DownloadYoutubePlaylist
             {
                 Resources.UrlStack.Push(playlistVideos[i].GetAttribute("href"));
             }
+        }
+
+        public static void SetDownloadsDirectoryPath()
+        {
+            var service = ChromeDriverService.CreateDefaultService(ConfigManager.ChromeDriverPath);
+
+            var downloadPrefs = new Dictionary<string, object>
+                {
+                    {"default_directory", Resources.TargetDirectory},
+                    {"directory_upgrade", true}
+                };
+
+            var options = new ChromeOptions();
+            options.AddUserProfilePreference("download", downloadPrefs);
+
+            _driver =  new ChromeDriver(service, options);
         }
 
         public static void QuitDriver()

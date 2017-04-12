@@ -1,13 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace DownloadYoutubePlaylist
 {
     public static class Resources
     {
+        public static string ArtistName { get; set; }
+
         public static string PlaylistUrl { get; set; }
 
         public static string TargetDirectory { get; set; }
