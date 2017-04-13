@@ -11,12 +11,6 @@ namespace DownloadYoutubePlaylist
     {
         static void Main(string[] args)
         {
-            SeleniumHandler.SetDownloadsDirectoryPath();
-            SeleniumHandler.NavigateToConverter();
-            SeleniumHandler.SearchVideo("Linkin Park - In The End Lyrics");
-            SeleniumHandler.ConvertFirstResult();
-            SeleniumHandler.SwitchToResultsWindow();
-            SeleniumHandler.ConvertVideo();
             try
             {
                 UIManager.Menu();
@@ -24,11 +18,14 @@ namespace DownloadYoutubePlaylist
                 Resources.TrackList = new Stack<string>(APIHandler.GetTopTracks());
 
                 DirectoryManager.InitTargetDirectory();
-                SeleniumHandler.SetDownloadsDirectoryPath();
 
-                //SeleniumHandler.FillUrlStackByArtist();
 
-                SeleniumHandler.ConvertAndDownload(Resources.UrlStack.Pop());
+
+                SeleniumHandler.NavigateToConverter();
+                SeleniumHandler.DownloadTracks(Resources.TrackList.Pop());
+
+                Thread thread = new Thread(new ThreadStart(ThreadFunction));
+
             }
             catch (Exception ex)
             {
@@ -38,6 +35,13 @@ namespace DownloadYoutubePlaylist
             {
                 SeleniumHandler.QuitDriver();
             }
+        }
+
+        public static void ThreadFunction()
+        {
+
+            SeleniumHandler.NavigateToConverter();
+            SeleniumHandler.DownloadTracks(Resources.TrackList.Pop());
         }
     }
 }

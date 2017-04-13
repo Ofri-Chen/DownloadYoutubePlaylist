@@ -14,6 +14,7 @@ namespace DownloadYoutubePlaylist
 
             Console.WriteLine("Enter target directory");
             Resources.TargetDirectory = ConfigManager.BaseTargetDirectoryPath + Console.ReadLine();
+            SeleniumHandler.SetDownloadsDirectoryPath();
             Console.WriteLine("Downloading to: " + Resources.TargetDirectory);
         }
     }
