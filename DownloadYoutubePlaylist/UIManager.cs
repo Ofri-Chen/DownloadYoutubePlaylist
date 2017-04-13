@@ -14,7 +14,7 @@ namespace DownloadYoutubePlaylist
 
             Console.WriteLine("Enter target directory");
             Resources.TargetDirectory = ConfigManager.BaseTargetDirectoryPath + Console.ReadLine();
-            Console.WriteLine("Directory's path: " + Resources.TargetDirectory);
+            Console.WriteLine("Downloading to: " + Resources.TargetDirectory);
         }
     }
 }

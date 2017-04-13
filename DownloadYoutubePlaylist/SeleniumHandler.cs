@@ -58,15 +58,63 @@ namespace DownloadYoutubePlaylist
             }
         }
 
-        public static void FillUrlList()
+        public static void DownloadTracks()
         {
-            _driver.Navigate().GoToUrl(Resources.PlaylistUrl);
+            NavigateToConverter();
+        }
+
+        public static void NavigateToConverter()
+        {
+            _driver.Navigate().GoToUrl(Resources.ConverterUrl);
+        }
+
+        public static void SearchVideo(string title)
+        {
+            _driver.FindElement(By.Id("search")).SendKeys(title);
+            _driver.FindElement(By.Name("searchForm")).FindElement(By.ClassName("mainbtn")).Click();
+        }
+
+        public static void ConvertFirstResult()
+        {
+            _driver.FindElements(By.CssSelector(".row.content .row .span7 .mainbtna"))[0].Click();
+        }
+
+        public static void ConvertVideo()
+        {
+            _driver.FindElement(By.CssSelector("#convertForm [type = submit]")).Click();
+            
+        }
+
+        public static void SwitchToResultsWindow()
+        {
+            _driver.SwitchTo().Window(_driver.WindowHandles[1]);
+        }
+
+        public static void ConvertAndDownloadTrack()
+        {
+
+        }
+
+        public static void FillUrlStack(string playlistUrl)
+        {
+            _driver.Navigate().GoToUrl(playlistUrl);
             List<IWebElement> playlistVideos = _driver.FindElements(By.ClassName("playlist-video")).ToList();
             for (int i = 0; i < playlistVideos.Count; i++)
             {
                 Resources.UrlStack.Push(playlistVideos[i].GetAttribute("href"));
             }
         }
+
+        //public static void FillUrlStackByArtist(int numOfTracks = 50)
+        //{
+        //    _driver.Navigate().GoToUrl("https://www.youtube.com/");
+        //    var youtubeSearchField = _driver.FindElement(By.Id("masthead-search-term"));
+        //    youtubeSearchField.Clear();
+
+            
+        //    youtubeSearchField.SendKeys(Resources.ArtistName + " - " + Resources.);
+        //}
+
 
         public static void SetDownloadsDirectoryPath()
         {

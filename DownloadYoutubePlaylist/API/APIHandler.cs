@@ -10,15 +10,14 @@ namespace DownloadYoutubePlaylist.API
 {
     public static class APIHandler
     {
-        public static void GetTopTracks()
+        public static IEnumerable<string> GetTopTracks()
         {
             WebRequest request = WebRequest.Create(RequestFomatter.GetTopTracksRequest());
             var response = request.GetResponse();
             Stream dataStream = response.GetResponseStream();
             StreamReader reader = new StreamReader(dataStream);
             string responseFromServer = reader.ReadToEnd();
-            XMLParser.ParseArtistTopTracks(responseFromServer);
-
+            return XMLParser.ParseArtistTopTracks(responseFromServer);
         }
 
     }

@@ -2,6 +2,8 @@
 using System.Threading;
 using DownloadYoutubePlaylist.FileManagement;
 using DownloadYoutubePlaylist.API;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace DownloadYoutubePlaylist
 {
@@ -9,16 +11,22 @@ namespace DownloadYoutubePlaylist
     {
         static void Main(string[] args)
         {
+            SeleniumHandler.SetDownloadsDirectoryPath();
+            SeleniumHandler.NavigateToConverter();
+            SeleniumHandler.SearchVideo("Linkin Park - In The End Lyrics");
+            SeleniumHandler.ConvertFirstResult();
+            SeleniumHandler.SwitchToResultsWindow();
+            SeleniumHandler.ConvertVideo();
             try
             {
                 UIManager.Menu();
 
-                APIHandler.GetTopTracks();
-
+                Resources.TrackList = new Stack<string>(APIHandler.GetTopTracks());
 
                 DirectoryManager.InitTargetDirectory();
                 SeleniumHandler.SetDownloadsDirectoryPath();
-                SeleniumHandler.FillUrlList();
+
+                //SeleniumHandler.FillUrlStackByArtist();
 
                 SeleniumHandler.ConvertAndDownload(Resources.UrlStack.Pop());
             }
