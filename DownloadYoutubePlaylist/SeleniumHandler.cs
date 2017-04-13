@@ -8,14 +8,13 @@ using DownloadYoutubePlaylist.FileManagement;
 
 namespace DownloadYoutubePlaylist
 {
-    public static class SeleniumHandler
+    public class SeleniumHandler
     {
-        private static IWebDriver _driver/* = new ChromeDriver(ConfigManager.ChromeDriverPath)*/;
-
+        private IWebDriver _driver;
         private const int WAIT_FOR_CONVERTION = 20;
 
         #region public methods
-        //public static void ConvertAndDownload(string url)
+        //public void ConvertAndDownload(string url)
         //{
         //    _driver.Navigate().GoToUrl(Resources.ConverterUrl);
         //    FillUrlTextBox(url);
@@ -61,12 +60,18 @@ namespace DownloadYoutubePlaylist
         //    }
         //}
 
-        public static void NavigateToConverter()
+        public SeleniumHandler()
+        {
+            SetDownloadsDirectoryPath();
+            NavigateToConverter();
+        }
+
+        public void NavigateToConverter()
         {
             _driver.Navigate().GoToUrl(Resources.ConverterUrl);
         }
 
-        public static void DownloadTracks(string trackName)
+        public void DownloadTracks(string trackName)
         {
             try
             {
@@ -91,7 +96,7 @@ namespace DownloadYoutubePlaylist
             DownloadTracks(Resources.TrackList.Pop());
         }
 
-        public static void SetDownloadsDirectoryPath()
+        private void SetDownloadsDirectoryPath()
         {
             var service = ChromeDriverService.CreateDefaultService(ConfigManager.ChromeDriverPath);
 
@@ -107,7 +112,7 @@ namespace DownloadYoutubePlaylist
             _driver = new ChromeDriver(service, options);
         }
 
-        public static void QuitDriver()
+        public void QuitDriver()
         {
             _driver.Quit();
         }
@@ -115,33 +120,33 @@ namespace DownloadYoutubePlaylist
 
         #region private methods
 
-        private static void ConvertAndDownloadTrack(string trackName)
+        private void ConvertAndDownloadTrack(string trackName)
         {
 
         }
 
-        private static void SearchVideo(string title)
+        private void SearchVideo(string title)
         {
             _driver.FindElement(By.Id("search")).SendKeys(title);
             _driver.FindElement(By.Name("searchForm")).FindElement(By.ClassName("mainbtn")).Click();
         }
 
-        private static string GetVideoTitle(int index = 0)
+        private string GetVideoTitle(int index = 0)
         {
             return _driver.FindElements(By.CssSelector(".searchtitle b"))[index].Text;
         }
 
-        private static void ClickOnResult(int index = 0)
+        private void ClickOnResult(int index = 0)
         {
             _driver.FindElements(By.CssSelector(".row.content .row .span7 .mainbtna"))[index].Click();
         }
 
-        private static void ConvertVideo()
+        private void ConvertVideo()
         {
             _driver.FindElement(By.CssSelector("#convertForm [type = submit]")).Click();
         }
 
-        private static void SetTrackName(string trackName)
+        private void SetTrackName(string trackName)
         {
             _driver.FindElement(By.CssSelector("#input_artist .btn")).Click();
             var input = _driver.FindElement(By.Id("inputArtist"));
@@ -156,23 +161,23 @@ namespace DownloadYoutubePlaylist
             _driver.FindElement(By.CssSelector(".controls .btn-success")).Click();
         }
 
-        private static void Download()
+        private void Download()
         {
             _driver.FindElement(By.CssSelector(".span7 .btn-success")).Click();
 
         }
 
-        private static void SwitchToResultsWindow()
+        private void SwitchToResultsWindow()
         {
             _driver.SwitchTo().Window(_driver.WindowHandles[1]);
         }
 
-        private static void GoToConverterMainPage()
+        private void GoToConverterMainPage()
         {
             _driver.FindElement(By.ClassName("brand")).Click();
         }
 
-        private static void ClosePopUpTabs()
+        private void ClosePopUpTabs()
         {
             var windowHandles = _driver.WindowHandles;
             for (int i = 1; i < windowHandles.Count; i++)
@@ -184,7 +189,7 @@ namespace DownloadYoutubePlaylist
         }
         #endregion
 
-        //public static void FillUrlStack(string playlistUrl)
+        //public void FillUrlStack(string playlistUrl)
         //{
         //    _driver.Navigate().GoToUrl(playlistUrl);
         //    List<IWebElement> playlistVideos = _driver.FindElements(By.ClassName("playlist-video")).ToList();
@@ -194,7 +199,7 @@ namespace DownloadYoutubePlaylist
         //    }
         //}
 
-        //public static void FillUrlStackByArtist(int numOfTracks = 50)
+        //public void FillUrlStackByArtist(int numOfTracks = 50)
         //{
         //    _driver.Navigate().GoToUrl("https://www.youtube.com/");
         //    var youtubeSearchField = _driver.FindElement(By.Id("masthead-search-term"));
@@ -205,13 +210,13 @@ namespace DownloadYoutubePlaylist
         //}
 
 
-        //private static void FillUrlTextBox(string url)
+        //private void FillUrlTextBox(string url)
         //{
         //    IWebElement urlTextBox = _driver.FindElement(By.Id("texturl"));
         //    urlTextBox.Clear();
         //    urlTextBox.SendKeys(url);
         //}
-        //private static bool DownloadSong()
+        //private bool DownloadSong()
         //{
         //    Stopwatch sw = new Stopwatch();
         //    sw.Start();
@@ -235,17 +240,17 @@ namespace DownloadYoutubePlaylist
 
         //    return true;
         //}
-        //private static void SaveTitle(string title)
+        //private void SaveTitle(string title)
         //{
         //    MakeTitleViable(ref title);
         //    Resources.TitleList.Add(title);
         //}
 
-        //private static string GetTitle()
+        //private string GetTitle()
         //{
         //    return _driver.FindElement(By.CssSelector(".download-section-1-1-title-content a")).Text;
         //}
-        //private static void MakeTitleViable(ref string title)
+        //private void MakeTitleViable(ref string title)
         //{
         //    // \/:*?"<>|
         //    string viableTitle = "";

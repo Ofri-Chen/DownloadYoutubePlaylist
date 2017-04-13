@@ -4,6 +4,7 @@ using DownloadYoutubePlaylist.FileManagement;
 using DownloadYoutubePlaylist.API;
 using System.Linq;
 using System.Collections.Generic;
+using System.IO;
 
 namespace DownloadYoutubePlaylist
 {
@@ -13,35 +14,43 @@ namespace DownloadYoutubePlaylist
         {
             try
             {
-                UIManager.Menu();
+                Thread[] threadArray;
+                UIManager.Menu(out threadArray);
 
                 Resources.TrackList = new Stack<string>(APIHandler.GetTopTracks());
 
                 DirectoryManager.InitTargetDirectory();
 
-
-
-                SeleniumHandler.NavigateToConverter();
-                SeleniumHandler.DownloadTracks(Resources.TrackList.Pop());
-
-                Thread thread = new Thread(new ThreadStart(ThreadFunction));
-
+                for (int i = 0; i < threadArray.Length; i++)
+                {
+                    threadArray[i] = new Thread(new ThreadStart(ThreadFunction));
+                    threadArray[i].Start();
+                }
             }
+            catch (Exception ex)
+            {
+                LogManager.Log(ex.Message, false);
+            }
+        }
+
+        public static void ThreadFunction()
+        {
+            SeleniumHandler sh = new SeleniumHandler();
+            try
+            {
+                sh.NavigateToConverter();
+                sh.DownloadTracks(Resources.TrackList.Pop());
+            }
+                        
             catch (Exception ex)
             {
                 LogManager.Log(ex.Message, false);
             }
             finally
             {
-                SeleniumHandler.QuitDriver();
+                sh.QuitDriver();
             }
-        }
 
-        public static void ThreadFunction()
-        {
-
-            SeleniumHandler.NavigateToConverter();
-            SeleniumHandler.DownloadTracks(Resources.TrackList.Pop());
         }
     }
 }
