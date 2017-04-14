@@ -2,9 +2,8 @@
 using System.Threading;
 using DownloadYoutubePlaylist.FileManagement;
 using DownloadYoutubePlaylist.API;
-using System.Linq;
 using System.Collections.Generic;
-using System.IO;
+using System.Diagnostics;
 
 namespace DownloadYoutubePlaylist
 {
@@ -12,6 +11,9 @@ namespace DownloadYoutubePlaylist
     {
         static void Main(string[] args)
         {
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+
             try
             {
                 Thread[] threadArray;
@@ -31,6 +33,8 @@ namespace DownloadYoutubePlaylist
             {
                 LogManager.Log(ex.Message, false);
             }
+
+            LogManager.LogFinishWork(sw.Elapsed.Milliseconds);
         }
 
         public static void ThreadFunction()
@@ -40,6 +44,9 @@ namespace DownloadYoutubePlaylist
             {
                 sh.NavigateToConverter();
                 sh.DownloadTracks(Resources.TrackList.Pop());
+                Stopwatch sw = new Stopwatch();
+                sw.Start();
+                while (sw.Elapsed.TotalMilliseconds < ConfigManager.WaitTillDownloadIsFinished * 1000) ;
             }
                         
             catch (Exception ex)

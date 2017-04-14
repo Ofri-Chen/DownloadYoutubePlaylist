@@ -15,6 +15,7 @@ namespace DownloadYoutubePlaylist
 
         public static int WaitForConversion = Convert.ToInt32(ConfigurationManager.AppSettings["waitForConversion"]);
 
+        public static int WaitTillDownloadIsFinished = Convert.ToInt32(ConfigurationManager.AppSettings["waitTillDownloadIsFinished"]);
 
         #region API Configs
 
