@@ -5,6 +5,7 @@ using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using System.Diagnostics;
 using DownloadYoutubePlaylist.FileManagement;
+using System.Threading;
 
 namespace DownloadYoutubePlaylist
 {
@@ -12,6 +13,7 @@ namespace DownloadYoutubePlaylist
     {
         private IWebDriver _driver;
         private const int WAIT_FOR_CONVERTION = 20;
+        private Object lockObj = new Object();
 
         #region public methods
         //public void ConvertAndDownload(string url)
@@ -93,8 +95,36 @@ namespace DownloadYoutubePlaylist
             _driver.SwitchTo().Window(_driver.WindowHandles[0]);
             GoToConverterMainPage();
 
-            DownloadTracks(Resources.TrackList.Pop());
+            string song;
+            lock (lockObj)
+            {
+                if (Resources.TrackList.Count > 0)
+                {
+                    song = Resources.TrackList.Pop();
+                }
+                else
+                {
+                    return;
+                }
+            }
+            DownloadTracks(song);
         }
+
+        public void WaitForFilesToDownload()
+        {
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            while (sw.Elapsed > TimeSpan.FromSeconds(ConfigManager.WaitTillDownloadIsFinished) ||
+                DirectoryManager.CheckIfThereAreUnfinishedDownloads()) ;
+        }
+
+        public void QuitDriver()
+        {
+            _driver.Quit();
+        }
+        #endregion
+
+        #region private methods
 
         private void SetDownloadsDirectoryPath()
         {
@@ -110,19 +140,6 @@ namespace DownloadYoutubePlaylist
             options.AddUserProfilePreference("download", downloadPrefs);
 
             _driver = new ChromeDriver(service, options);
-        }
-
-        public void QuitDriver()
-        {
-            _driver.Quit();
-        }
-        #endregion
-
-        #region private methods
-
-        private void ConvertAndDownloadTrack(string trackName)
-        {
-
         }
 
         private void SearchVideo(string title)
@@ -187,91 +204,8 @@ namespace DownloadYoutubePlaylist
             }
             _driver.SwitchTo().Window(windowHandles[0]);
         }
+
+
         #endregion
-
-        //public void FillUrlStack(string playlistUrl)
-        //{
-        //    _driver.Navigate().GoToUrl(playlistUrl);
-        //    List<IWebElement> playlistVideos = _driver.FindElements(By.ClassName("playlist-video")).ToList();
-        //    for (int i = 0; i < playlistVideos.Count; i++)
-        //    {
-        //        Resources.UrlStack.Push(playlistVideos[i].GetAttribute("href"));
-        //    }
-        //}
-
-        //public void FillUrlStackByArtist(int numOfTracks = 50)
-        //{
-        //    _driver.Navigate().GoToUrl("https://www.youtube.com/");
-        //    var youtubeSearchField = _driver.FindElement(By.Id("masthead-search-term"));
-        //    youtubeSearchField.Clear();
-
-
-        //    youtubeSearchField.SendKeys(Resources.ArtistName + " - " + Resources.);
-        //}
-
-
-        //private void FillUrlTextBox(string url)
-        //{
-        //    IWebElement urlTextBox = _driver.FindElement(By.Id("texturl"));
-        //    urlTextBox.Clear();
-        //    urlTextBox.SendKeys(url);
-        //}
-        //private bool DownloadSong()
-        //{
-        //    Stopwatch sw = new Stopwatch();
-        //    sw.Start();
-        //    while (sw.Elapsed < TimeSpan.FromSeconds(30))
-        //    {
-        //        ClosePopUpTabs();
-        //        try
-        //        {
-        //            _driver.FindElement(By.Id("downloadq")).Click();
-        //            break;
-        //        }
-        //        catch
-        //        {
-        //            if (sw.Elapsed > TimeSpan.FromSeconds(30))
-        //            {
-        //                LogManager.Log("Took too long to convert", false);
-        //                return false;
-        //            }
-        //        }
-        //    }
-
-        //    return true;
-        //}
-        //private void SaveTitle(string title)
-        //{
-        //    MakeTitleViable(ref title);
-        //    Resources.TitleList.Add(title);
-        //}
-
-        //private string GetTitle()
-        //{
-        //    return _driver.FindElement(By.CssSelector(".download-section-1-1-title-content a")).Text;
-        //}
-        //private void MakeTitleViable(ref string title)
-        //{
-        //    // \/:*?"<>|
-        //    string viableTitle = "";
-        //    for (int i = 0; i < title.Length; i++)
-        //    {
-        //        if (title[i] != '\\' ||
-        //            title[i] != '/' ||
-        //            title[i] != ':' ||
-        //            title[i] != '*' ||
-        //            title[i] != '?' ||
-        //            title[i] != '"' ||
-        //            title[i] != '<' ||
-        //            title[i] != '>' ||
-        //            title[i] != '|')
-        //        {
-        //            viableTitle += title[i];
-        //        }
-        //    }
-        //}
-
-
-
     }
 }

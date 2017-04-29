@@ -9,5 +9,10 @@ namespace DownloadYoutubePlaylist.FileManagement
             Resources.TargetDirectory = ConfigManager.BaseTargetDirectoryPath + Resources.ArtistName;
             Directory.CreateDirectory(Resources.TargetDirectory);
         }
+
+        public static bool CheckIfThereAreUnfinishedDownloads()
+        {
+            return Directory.GetFiles(Resources.TargetDirectory, "*.crdownload").Length > 0; 
+        }
     }
 }
