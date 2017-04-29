@@ -19,7 +19,5 @@ namespace DownloadYoutubePlaylist.API
             string responseFromServer = reader.ReadToEnd();
             return XMLParser.ParseArtistTopTracks(responseFromServer);
         }
-
     }
 }
-

@@ -19,5 +19,7 @@ namespace DownloadYoutubePlaylist
         public static Stack<string> UrlStack = new Stack<string>();
 
         public static List<string> TitleList = new List<string>();
+
+        public static int Limit = 50;
     }
 }

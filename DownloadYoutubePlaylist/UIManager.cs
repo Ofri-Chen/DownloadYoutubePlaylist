@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading;
+using System.Collections.Generic;
 
 namespace DownloadYoutubePlaylist
 {
@@ -9,32 +10,51 @@ namespace DownloadYoutubePlaylist
 
         public static void Menu(out Thread [] threadArray)
         {
-            //Console.WriteLine("Enter Playlist url");
-            //Resources.PlaylistUrl = /*Console.ReadLine();*/"https://www.youtube.com/watch?v=Og5-Pm4HNlI&list=PLAYFVhxsaqDuOh4Ic5mRu5CiZVKCMVv66";
+            ReadArtistAndLimit();
+            threadArray = new Thread[ReadNumOfThreads()];
+        }
 
+        private static void ReadArtistAndLimit()
+        {
             Console.WriteLine("Enter artist's name");
-            Resources.ArtistName = Console.ReadLine();
+            string line = Console.ReadLine();
 
-            //Console.WriteLine("Enter target directory");
-            //Resources.TargetDirectory = ConfigManager.BaseTargetDirectoryPath + Console.ReadLine();
-            //Console.WriteLine("Downloading to: " + Resources.TargetDirectory);
+            if (Flags.AreThereFlags(line))
+            {
 
+                string[] flags = line.Split('/');
+                for (int i = 1; i < flags.Length; i++)
+                {
+                    Flags.FlagManager(flags[i]);
+                }
+
+                Resources.ArtistName = flags[0].Trim();
+            }
+            else
+            {
+                Resources.ArtistName = line.Trim();
+            }
+        }
+
+        private static int ReadNumOfThreads()
+        {
             Console.WriteLine("How many instances of chrome would you like to work on the job? (Max {0})", MAX_THREADS);
             int numOfThreads;
             try
             {
                 numOfThreads = Convert.ToInt32(Console.ReadLine());
+                if (numOfThreads < 1 || numOfThreads > MAX_THREADS)
+                {
+                    numOfThreads = 1;
+                }
             }
             catch
             {
                 numOfThreads = 1;
             }
-            if(numOfThreads < 1 || numOfThreads > MAX_THREADS)
-            {
-                numOfThreads = 1;
-            }
 
-            threadArray = new Thread[numOfThreads];
+
+            return numOfThreads;
         }
     }
 }

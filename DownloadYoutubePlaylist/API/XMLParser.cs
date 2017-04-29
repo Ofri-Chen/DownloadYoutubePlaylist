@@ -17,7 +17,8 @@ namespace DownloadYoutubePlaylist.API
                 .Cast<XmlNode>()
                 .Select(node => node.InnerXml)
                 .Where(trackName => trackName.ToLower() != Resources.ArtistName.ToLower()
-                .Replace('_', ' '));
+                .Replace('_', ' '))
+                .Take(Resources.Limit);
         }
     }
 }
