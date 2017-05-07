@@ -35,9 +35,8 @@ namespace DownloadYoutubePlaylist
 
         private static void ReadInputType()
         {
-            Console.WriteLine("Would you like to insert to artist's name or read names from a file?");
-            Console.WriteLine("Press 1 to insert");
-            Console.WriteLine("Press 2 for file");
+            Console.WriteLine("Press 1 to insert an artist's name");
+            Console.WriteLine("Press 2 to insert a file path");
             int inputType;
             try
             {
@@ -58,24 +57,7 @@ namespace DownloadYoutubePlaylist
         private static void ReadArtistAndLimit()
         {
             Console.WriteLine("Enter artist's name");
-            string line = Console.ReadLine();
-
-            if (Flags.AreThereFlags(line))
-            {
-                string[] flags = line.Split('/');
-                for (int i = 1; i < flags.Length; i++)
-                {
-                    Flags.FlagManager(flags[i]);
-                }
-
-                //Resources.ArtistName = flags[0].Trim();
-                Resources.Artists = new string[] { (flags[0].Trim()) };
-            }
-            else
-            {
-                //Resources.ArtistName = line.Trim();
-                Resources.Artists = new string[] { line.Trim() };
-            }
+            Resources.Artists = new string[] { Console.ReadLine().Trim() };
         }
 
         private static void ReadArtists()

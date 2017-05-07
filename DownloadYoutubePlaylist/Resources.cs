@@ -22,7 +22,7 @@ namespace DownloadYoutubePlaylist
 
         public static List<string> TitleList = new List<string>();
 
-        public static int Limit = 50; //the default amount of results returned from the API
+        public static int Limit = ConfigManager.DefaultLimit; //the default amount of results returned from the API
 
         public static int InputType = 1; //insert artist name
     }

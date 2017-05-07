@@ -8,12 +8,19 @@ namespace DownloadYoutubePlaylist
 {
     static class Flags
     {
-        public static bool AreThereFlags(string command)
+        public static void ManageFlags(string line)
         {
-            return command.Contains('/');
+            if (line.Contains('/')) //checks if there are flags
+            {
+                string[] flags = line.Split('/');
+                for (int i = 1; i < flags.Length; i++)
+                {
+                    FlagRouter(flags[i]);
+                }
+            }
         }
 
-        public static void FlagManager(string command)
+        public static void FlagRouter(string command)
         {
             switch (command[0])
             {
@@ -32,7 +39,7 @@ namespace DownloadYoutubePlaylist
             try
             {
                 limit = Convert.ToInt32(limitStr);
-                if(limit >= 50 || limit <= 1)
+                if(limit > 50 || limit < 1)
                 {
                     limit = 50;
                 }

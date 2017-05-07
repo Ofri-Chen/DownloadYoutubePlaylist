@@ -11,38 +11,44 @@ namespace DownloadYoutubePlaylist
     {
         static void Main(string[] args)
         {
-            Stopwatch sw = new Stopwatch();
-            sw.Start();
+
             Thread[] threadArray;
             UIManager.Menu(out threadArray);
             try
             {
                 for (int i = 0; i < Resources.Artists.Length; i++)
                 {
-                    //Resources.ArtistName = Resources.Artists[i];
-                    Resources.TrackList = new Stack<string>(APIHandler.GetTopTracks(Resources.Artists[i]));
-                    DirectoryManager.InitTargetDirectory(Resources.Artists[i]);
+                    Stopwatch sw = new Stopwatch();
+                    sw.Start();
+                    ResetGlobalReources();
+                    Flags.ManageFlags(Resources.Artists[i]);
+                    string artistName = Resources.Artists[i].Split('/')[0].Trim();
+                    try
+                    {
+                        Resources.TrackList = new Stack<string>(APIHandler.GetTopTracks(artistName));
+                    }
+                    catch
+                    {
+                        continue;
+                    }
+                    DirectoryManager.InitTargetDirectory(artistName);
 
                     for (int j = 0; j < threadArray.Length; j++)
                     {
-                        threadArray[j] = new Thread(new ThreadStart(() => ThreadFunction(Resources.Artists[i])));
+                        threadArray[j] = new Thread(new ThreadStart(() => ThreadFunction(artistName)));
                         threadArray[j].Start();
                     }
-                    //Wait for thread to finish - VERY IMPORTANT - otherwise you'll have 564654 chromes open (and you don't want that)
+
                     foreach (Thread thread in threadArray)
                     {
                         thread.Join();
                     }
+                    LogManager.LogFinishWork(sw.Elapsed.Milliseconds);
                 }
             }
             catch (Exception ex)
             {
                 LogManager.Log(ex.Message, false);
-            }
-
-            finally
-            {
-                LogManager.LogFinishWork(sw.Elapsed.Milliseconds);
             }
         }
 
@@ -55,7 +61,7 @@ namespace DownloadYoutubePlaylist
                 sh.DownloadTracks(Resources.TrackList.Pop(), artistName);
                 sh.WaitForFilesToDownload();
             }
-                        
+
             catch (Exception ex)
             {
                 LogManager.Log(ex.Message, false);
@@ -64,6 +70,11 @@ namespace DownloadYoutubePlaylist
             {
                 sh.QuitDriver();
             }
+        }
+
+        private static void ResetGlobalReources()
+        {
+            Resources.Limit = ConfigManager.DefaultLimit;
         }
     }
 }

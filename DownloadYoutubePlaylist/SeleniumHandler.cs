@@ -16,51 +16,6 @@ namespace DownloadYoutubePlaylist
         private Object lockObj = new Object();
 
         #region public methods
-        //public void ConvertAndDownload(string url)
-        //{
-        //    _driver.Navigate().GoToUrl(Resources.ConverterUrl);
-        //    FillUrlTextBox(url);
-        //    bool convertionFlag = true;
-
-        //    Stopwatch sw = new Stopwatch();
-        //    sw.Start();
-        //    while (sw.Elapsed < TimeSpan.FromSeconds(20))
-        //    {
-        //        ClosePopUpTabs();
-        //        try
-        //        {
-        //            _driver.FindElement(By.Id("convert1")).Click();
-        //            break;
-        //        }
-        //        catch
-        //        {
-        //            if (sw.Elapsed > TimeSpan.FromSeconds(20))
-        //            {
-        //                LogManager.Log("Took too long for the convert button to appear", false);
-        //                convertionFlag = false;
-        //            }
-        //        }
-        //    }
-
-        //    if (convertionFlag)
-        //    {
-        //        if (DownloadSong())
-        //        {
-        //            string title = GetTitle();
-        //            LogManager.Log(title, true);
-        //            SaveTitle(title);
-        //        }
-
-        //        try
-        //        {
-        //            ConvertAndDownload(Resources.UrlStack.Pop());
-        //        }
-        //        catch (Exception ex)
-        //        {
-        //            LogManager.Log(ex.Message, false);
-        //        }
-        //    }
-        //}
 
         public SeleniumHandler()
         {
@@ -77,7 +32,7 @@ namespace DownloadYoutubePlaylist
         {
             try
             {
-                SearchVideo(trackName + " Lyrics");
+                SearchVideo(trackName + GetLyricsKeyword(artistName));
                 ClosePopUpTabs();
                 ClickOnResult();
                 SwitchToResultsWindow();
@@ -205,7 +160,17 @@ namespace DownloadYoutubePlaylist
             _driver.SwitchTo().Window(windowHandles[0]);
         }
 
-
+        private string GetLyricsKeyword(string artistName)
+        {
+            if(artistName[0] > 'א' && artistName[0] < 'ת')
+            {
+                return "";
+            }
+            else
+            {
+                return "Lyrics";
+            }
+        }
         #endregion
     }
 }
