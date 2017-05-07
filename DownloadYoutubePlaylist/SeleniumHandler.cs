@@ -73,7 +73,7 @@ namespace DownloadYoutubePlaylist
             _driver.Navigate().GoToUrl(Resources.ConverterUrl);
         }
 
-        public void DownloadTracks(string trackName)
+        public void DownloadTracks(string trackName, string artistName)
         {
             try
             {
@@ -82,7 +82,7 @@ namespace DownloadYoutubePlaylist
                 ClickOnResult();
                 SwitchToResultsWindow();
                 ConvertVideo();
-                SetTrackName(trackName);
+                SetTrackName(trackName, artistName);
                 Download();
                 LogManager.Log(trackName, true);
             }
@@ -107,7 +107,7 @@ namespace DownloadYoutubePlaylist
                     return;
                 }
             }
-            DownloadTracks(song);
+            DownloadTracks(song, artistName);
         }
 
         public void WaitForFilesToDownload()
@@ -163,12 +163,12 @@ namespace DownloadYoutubePlaylist
             _driver.FindElement(By.CssSelector("#convertForm [type = submit]")).Click();
         }
 
-        private void SetTrackName(string trackName)
+        private void SetTrackName(string trackName, string artistName)
         {
             _driver.FindElement(By.CssSelector("#input_artist .btn")).Click();
             var input = _driver.FindElement(By.Id("inputArtist"));
             input.Clear();
-            input.SendKeys(Resources.ArtistName);
+            input.SendKeys(artistName);
 
             _driver.FindElement(By.CssSelector("#input_title .btn")).Click();
             input = _driver.FindElement(By.Id("inputTitle"));

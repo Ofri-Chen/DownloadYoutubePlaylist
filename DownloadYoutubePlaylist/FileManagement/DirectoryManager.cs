@@ -4,9 +4,9 @@ namespace DownloadYoutubePlaylist.FileManagement
 {
     public static class DirectoryManager
     {
-        public static void InitTargetDirectory()
+        public static void InitTargetDirectory(string artistName)
         {
-            Resources.TargetDirectory = ConfigManager.BaseTargetDirectoryPath + Resources.ArtistName;
+            Resources.TargetDirectory = ConfigManager.BaseTargetDirectoryPath + artistName;
             Directory.CreateDirectory(Resources.TargetDirectory);
         }
 

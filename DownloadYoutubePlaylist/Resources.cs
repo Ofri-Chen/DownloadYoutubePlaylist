@@ -6,6 +6,8 @@ namespace DownloadYoutubePlaylist
     {
         public static string ArtistName { get; set; }
 
+        public static string[] Artists { get; set; }
+
         public static string PlaylistUrl { get; set; }
 
         public static string TargetDirectory { get; set; }
@@ -20,6 +22,8 @@ namespace DownloadYoutubePlaylist
 
         public static List<string> TitleList = new List<string>();
 
-        public static int Limit = 50;
+        public static int Limit = 50; //the default amount of results returned from the API
+
+        public static int InputType = 1; //insert artist name
     }
 }

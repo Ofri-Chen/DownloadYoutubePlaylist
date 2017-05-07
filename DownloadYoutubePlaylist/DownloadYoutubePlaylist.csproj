@@ -57,6 +57,7 @@
     <Compile Include="API\XMLParser.cs" />
     <Compile Include="ConfigManager.cs" />
     <Compile Include="FileManagement\DirectoryManager.cs" />
+    <Compile Include="FileManagement\FileReader.cs" />
     <Compile Include="FileManagement\LogManager.cs" />
     <Compile Include="Flags.cs" />
     <Compile Include="Program.cs" />

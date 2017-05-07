@@ -13,20 +13,26 @@ namespace DownloadYoutubePlaylist
         {
             Stopwatch sw = new Stopwatch();
             sw.Start();
-
+            Thread[] threadArray;
+            UIManager.Menu(out threadArray);
             try
             {
-                Thread[] threadArray;
-                UIManager.Menu(out threadArray);
-
-                Resources.TrackList = new Stack<string>(APIHandler.GetTopTracks());
-
-                DirectoryManager.InitTargetDirectory();
-
-                for (int i = 0; i < threadArray.Length; i++)
+                for (int i = 0; i < Resources.Artists.Length; i++)
                 {
-                    threadArray[i] = new Thread(new ThreadStart(ThreadFunction));
-                    threadArray[i].Start();
+                    //Resources.ArtistName = Resources.Artists[i];
+                    Resources.TrackList = new Stack<string>(APIHandler.GetTopTracks(Resources.Artists[i]));
+                    DirectoryManager.InitTargetDirectory(Resources.Artists[i]);
+
+                    for (int j = 0; j < threadArray.Length; j++)
+                    {
+                        threadArray[j] = new Thread(new ThreadStart(() => ThreadFunction(Resources.Artists[i])));
+                        threadArray[j].Start();
+                    }
+                    //Wait for thread to finish - VERY IMPORTANT - otherwise you'll have 564654 chromes open (and you don't want that)
+                    foreach (Thread thread in threadArray)
+                    {
+                        thread.Join();
+                    }
                 }
             }
             catch (Exception ex)
@@ -40,20 +46,14 @@ namespace DownloadYoutubePlaylist
             }
         }
 
-        public static void ThreadFunction()
+        public static void ThreadFunction(string artistName)
         {
             SeleniumHandler sh = new SeleniumHandler();
             try
             {
                 sh.NavigateToConverter();
-                sh.DownloadTracks(Resources.TrackList.Pop());
+                sh.DownloadTracks(Resources.TrackList.Pop(), artistName);
                 sh.WaitForFilesToDownload();
-
-                //Stopwatch sw = new Stopwatch();
-                //sw.Start();
-                //while (sw.Elapsed.TotalMilliseconds < ConfigManager.WaitTillDownloadIsFinished * 1000) {
-                //    Console.WriteLine("Waiting for {0} seconds to pass", ConfigManager.WaitTillDownloadIsFinished);
-                //}
             }
                         
             catch (Exception ex)
@@ -64,7 +64,6 @@ namespace DownloadYoutubePlaylist
             {
                 sh.QuitDriver();
             }
-
         }
     }
 }
